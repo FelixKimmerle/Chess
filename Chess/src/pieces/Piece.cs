@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Chess.src.moves;
 
 namespace Chess.src.pieces
 {
@@ -13,18 +14,16 @@ namespace Chess.src.pieces
         }
 
         protected bool moved = false;
-
-
         protected BoardLocation location;
         protected readonly PieceColor pieceColor;
         public abstract PieceType GetPieceType();
-        public abstract HashSet<Move> GetPossibleMoves(Field field);
-        public bool IsPossible(Move move, Field field)
+        public abstract HashSet<IMove> GetPossibleMoves(Field field);
+        public bool IsPossible(IMove move, Field field)
         {
             var moves = GetPossibleMoves(field);
             return moves.Contains(move);
         }
-        public virtual void ExecuteMove(Move move)
+        public virtual void ExecuteMove(AtomicMove move)
         {
             moved = true;
             location = move.GetDestination();
@@ -51,21 +50,21 @@ namespace Chess.src.pieces
             return pieceColor;
         }
 
-        protected HashSet<Move> checkDirection(int x, int y, Field field)
+        protected HashSet<IMove> checkDirection(int x, int y, Field field)
         {
-            HashSet<Move> moves = new HashSet<Move>();
+            HashSet<IMove> moves = new HashSet<IMove>();
 
             BoardLocation current = location.Offset(x, y);
 
             while (current.IsValid() && field.IsFree(current))
             {
-                moves.Add(new Move(GetPieceType(), location, current));
+                moves.Add(new AtomicMove(GetPieceType(), location, current));
                 current = current.Offset(x, y);
             }
 
             if (field.IsEnemy(current, pieceColor))
             {
-                moves.Add(new Move(GetPieceType(), location, current));
+                moves.Add(new AtomicMove(GetPieceType(), location, current));
             }
 
             return moves;

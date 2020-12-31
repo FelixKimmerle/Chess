@@ -1,4 +1,5 @@
-﻿using Chess.src.pieces;
+﻿using Chess.src.moves;
+using Chess.src.pieces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,10 +9,17 @@ namespace Chess.src
     public class Field
     {
         private Piece[,] field = new Piece[8, 8];
+        private readonly HashSet<Piece> whitePieces = new HashSet<Piece>();
+        private readonly HashSet<Piece> blackPieces = new HashSet<Piece>();
 
         public Field()
         {
-            Clean();
+            //Clean();
+            Add(new Rook(new BoardLocation(0, 7), Piece.PieceColor.Black));
+            Add(new Rook(new BoardLocation(0, 0), Piece.PieceColor.White));
+            Add(new Rook(new BoardLocation(7, 7), Piece.PieceColor.Black));
+            Add(new Rook(new BoardLocation(7, 0), Piece.PieceColor.White));
+
         }
         public void Clean()
         {
@@ -43,37 +51,81 @@ namespace Chess.src
             Add(new Bishop(new BoardLocation(5, 0), Piece.PieceColor.White));
 
             //King
-            Add(new King(new BoardLocation(3, 7), Piece.PieceColor.Black));
-            Add(new King(new BoardLocation(3, 0), Piece.PieceColor.White));
+            Add(new King(new BoardLocation(4, 7), Piece.PieceColor.Black));
+            Add(new King(new BoardLocation(4, 0), Piece.PieceColor.White));
 
             //Queen
-            Add(new Queen(new BoardLocation(4, 7), Piece.PieceColor.Black));
-            Add(new Queen(new BoardLocation(4, 0), Piece.PieceColor.White));
+            Add(new Queen(new BoardLocation(3, 7), Piece.PieceColor.Black));
+            Add(new Queen(new BoardLocation(3, 0), Piece.PieceColor.White));
         }
 
-        public void ExecuteMove(Move move)
+        public void ExecuteAtomicMove(AtomicMove move)
         {
             Piece piece = Get(move.GetStart());
             Piece destPiece = Get(move.GetDestination());
 
-            Set(move.GetDestination(), piece);
-
-            if (destPiece != null && piece.GetPieceColor() == destPiece.GetPieceColor())
+            if(destPiece != null && destPiece.GetPieceColor() == Piece.PieceColor.White)
             {
-                //Rochade
-                Set(move.GetStart(), destPiece);
-                destPiece.ExecuteMove(new Move(PieceType.Rook, move.GetDestination(), move.GetStart()));
+                whitePieces.Remove(destPiece);
             }
             else
             {
-                Set(move.GetStart(), null);
+                blackPieces.Remove(destPiece);
             }
 
+            Set(move.GetDestination(), piece);
+            Set(move.GetStart(), null);
             piece.ExecuteMove(move);
+
+            //System.Console.WriteLine("W: " + whitePieces.Count + " B: " + blackPieces.Count);
+        }
+
+        public HashSet<IMove> GetEnemyMoves(Piece.PieceColor color)
+        {
+            HashSet<IMove> moves = new HashSet<IMove>();
+
+            HashSet<Piece> pieces;
+
+            if(color == Piece.PieceColor.White)
+            {
+                pieces = blackPieces;
+            }
+            else
+            {
+                pieces = whitePieces;
+            }
+
+            foreach (Piece piece in pieces)
+            {
+                HashSet<IMove> possibleMove = piece.GetPossibleMoves(this);
+                foreach (IMove m in possibleMove)
+                {
+                    Piece other = Get(m.GetDestination());
+                    if(other != null && other.GetPieceColor() == color)
+                    {
+                        moves.Add(m);
+                    }
+                }
+            }
+
+            return moves;
+        }
+
+        public void ExecuteMove(IMove move)
+        {
+            move.ExecuteMove(this);
         }
 
         private void Add(Piece piece)
         {
+            if(piece.GetPieceColor() == Piece.PieceColor.White)
+            {
+                whitePieces.Add(piece);
+            }
+            else
+            {
+                blackPieces.Add(piece);
+            }
             BoardLocation location = piece.GetBoardLocation();
             Set(location, piece);
         }
@@ -84,7 +136,7 @@ namespace Chess.src
 
         public Piece Get(BoardLocation location)
         {
-            if(location.GetX() < 0 || location.GetX() > 7 || location.GetY() < 0 || location.GetY() > 7)
+            if (location.GetX() < 0 || location.GetX() > 7 || location.GetY() < 0 || location.GetY() > 7)
             {
                 return null;
             }
@@ -109,7 +161,7 @@ namespace Chess.src
             return !IsFree(location) && Get(location).GetPieceColor() != color;
         }
 
-        private void PrintLine(int y, bool printPiece = false)
+        private void PrintLine(int y, bool printPiece = false, bool printLocation = false)
         {
             for (int x = 0; x < 8; x++)
             {
@@ -123,7 +175,16 @@ namespace Chess.src
                 {
                     Console.BackgroundColor = ConsoleColor.DarkRed;
                 }
-                Console.Write("   ");
+                if (printLocation)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    BoardLocation location = new BoardLocation(x, 7 - y);
+                    Console.Write(location.ToString() + " ");
+                }
+                else
+                {
+                    Console.Write("   ");
+                }
                 if (printPiece && piece != null)
                 {
                     Piece.PieceColor pieceColor = piece.GetPieceColor();
@@ -150,7 +211,7 @@ namespace Chess.src
         {
             for (int y = 0; y < 8; y++)
             {
-                PrintLine(y);
+                PrintLine(y, false, true);
                 PrintLine(y, true);
                 PrintLine(y);
             }

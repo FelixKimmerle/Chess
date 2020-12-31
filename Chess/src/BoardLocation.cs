@@ -37,6 +37,11 @@ namespace Chess.src
             return x >= 0 && x <= 7 && y >= 0 && y <= 7;
         }
 
+        public int EulerDistance(BoardLocation location)
+        {
+            return Math.Abs(x - location.x) + Math.Abs(y - location.y);
+        }
+
         public BoardLocation Forward(Piece.PieceColor pieceColor, int number = 1)
         {
             if (pieceColor == Piece.PieceColor.White)

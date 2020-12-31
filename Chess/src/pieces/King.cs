@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Chess.src.moves;
 
 namespace Chess.src.pieces
 {
@@ -16,9 +17,9 @@ namespace Chess.src.pieces
             return PieceType.King;
         }
 
-        public override HashSet<Move> GetPossibleMoves(Field field)
+        public override HashSet<IMove> GetPossibleMoves(Field field)
         {
-            HashSet<Move> moves = new HashSet<Move>();
+            HashSet<IMove> moves = new HashSet<IMove>();
 
             for (int y = -1; y < 2; y++)
             {
@@ -26,42 +27,50 @@ namespace Chess.src.pieces
                 {
                     if (x != 0 || y != 0)
                     {
-                        BoardLocation destination = location.Offset(x,y);
+                        BoardLocation destination = location.Offset(x, y);
 
                         if (destination.IsValid() && (field.IsFree(destination) || field.IsEnemy(destination, pieceColor)))
                         {
-                            moves.Add(new Move(GetPieceType(), location, destination));
+                            moves.Add(new AtomicMove(GetPieceType(), location, destination));
                         }
                     }
                 }
             }
-
-            BoardLocation current = location.Offset(1, 0);
-            
-            while(current.IsValid() && field.IsFree(current))
+            if (!moved)
             {
-                current = current.Offset(1, 0);
+                //Long Rochade
+                BoardLocation current = location.Offset(1, 0);
+                while (current.IsValid() && field.IsFree(current))
+                {
+                    current = current.Offset(1, 0);
+                }
+
+                Piece other = field.Get(current);
+                if (current.IsValid() && other.GetPieceType() == PieceType.Rook && !other.WasMoved())
+                {
+                    moves.Add(
+                        new Rochade(new AtomicMove(GetPieceType(), location, location.Offset(2, 0)),
+                        new AtomicMove(PieceType.Rook, current, current.Offset(-2, 0))
+                        ));
+                }
+
+                //Short Rochade
+                current = location.Offset(-1, 0);
+
+                while (current.IsValid() && field.IsFree(current))
+                {
+                    current = current.Offset(-1, 0);
+                }
+
+                other = field.Get(current);
+                if (current.IsValid() && other.GetPieceType() == PieceType.Rook && !other.WasMoved())
+                {
+                    moves.Add(
+                        new Rochade(new AtomicMove(GetPieceType(), location, location.Offset(-2, 0)),
+                        new AtomicMove(PieceType.Rook, current, location.Offset(-1, 0))
+                        ));
+                }
             }
-
-            Piece other = field.Get(current);
-            if (current.IsValid() && other.GetPieceType() == PieceType.Rook && !other.WasMoved())
-            {
-                moves.Add(new Move(GetPieceType(), location, current));
-            }
-
-            current = location.Offset(-1, 0);
-
-            while (current.IsValid() && field.IsFree(current))
-            {
-                current = current.Offset(-1, 0);
-            }
-
-            other = field.Get(current);
-            if (current.IsValid() && other.GetPieceType() == PieceType.Rook && !other.WasMoved())
-            {
-                moves.Add(new Move(GetPieceType(), location, current));
-            }
-
             return moves;
         }
 

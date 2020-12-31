@@ -12,6 +12,7 @@ namespace Chess.src.rendering
         private RenderGame renderGame;
         public void Run()
         {
+            ContextSettings contextSettings = new ContextSettings(64,64,16);
             VideoMode mode = new VideoMode(800, 800);
             RenderWindow window = new RenderWindow(mode, "Chess", Styles.Default);
             window.SetVerticalSyncEnabled(true);

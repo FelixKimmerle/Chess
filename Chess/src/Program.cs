@@ -7,8 +7,6 @@ namespace Chess.src
     {
         static void Main(string[] args)
         {
-            Field field = new Field();
-            field.Print();
             ChessWindow chessWindow = new ChessWindow();
             chessWindow.Run();
         }

@@ -1,4 +1,5 @@
-﻿using Chess.src.pieces;
+﻿using Chess.src.moves;
+using Chess.src.pieces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,13 +12,14 @@ namespace Chess.src
     public class Game
     {
         private Field field = new Field();
-        private List<Move> whiteMoves = new List<Move>();
-        private List<Move> blackMoves = new List<Move>();
+        private List<IMove> whiteMoves = new List<IMove>();
+        private List<IMove> blackMoves = new List<IMove>();
         private Piece.PieceColor turn = Piece.PieceColor.White;
+        private BackgroundWorker worker = new BackgroundWorker();
+
 
         public Game()
         {
-            BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += Worker_DoWork;
             worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
             worker.RunWorkerAsync();
@@ -31,15 +33,32 @@ namespace Chess.src
             {
                 Save(splitted[1]);
             }
+            else if (splitted[0] == "clear")
+            {
+                field.Clean();
+                whiteMoves.Clear();
+                blackMoves.Clear();
+                turn = Piece.PieceColor.White;
+            }
             else
             {
-                Move move = new Move(line);
+                IMove move;
+                if (line[0] == '0')
+                {
+                    move = new Rochade(line, turn);
+                }
+                else
+                {
+                    move = new AtomicMove(line);
+                }
                 Piece piece = field.Get(move.GetStart());
                 if (piece != null && piece.IsPossible(move, field) && piece.GetPieceColor() == turn)
                 {
-                    ExecuteMove((Move)e.Result);
+                    ExecuteMove(move);
                 }
             }
+            worker.RunWorkerAsync();
+
 
         }
 
@@ -60,7 +79,7 @@ namespace Chess.src
             return turn;
         }
 
-        public void ExecuteMove(Move move)
+        public void ExecuteMove(IMove move)
         {
             if (turn == Piece.PieceColor.White)
             {
@@ -72,7 +91,7 @@ namespace Chess.src
                 blackMoves.Add(move);
                 turn = Piece.PieceColor.White;
             }
-            field.ExecuteMove(move);
+            move.ExecuteMove(field);
             Console.WriteLine(move);
             field.Print();
         }
@@ -80,7 +99,7 @@ namespace Chess.src
         public void Save(string filename)
         {
             StreamWriter file = new StreamWriter(filename);
-            for (int i = 0; i < Math.Max(whiteMoves.Count,blackMoves.Count); i++)
+            for (int i = 0; i < Math.Max(whiteMoves.Count, blackMoves.Count); i++)
             {
                 if (i < whiteMoves.Count)
                 {

@@ -3,27 +3,27 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Chess.src
+namespace Chess.src.moves
 {
-    public class Move
+    public class AtomicMove : IMove
     {
         private readonly PieceType piece;
         private readonly BoardLocation from;
         private readonly BoardLocation to;
 
-        public Move(PieceType piece, BoardLocation from, BoardLocation to)
+        public AtomicMove(PieceType piece, BoardLocation from, BoardLocation to)
         {
             this.piece = piece;
             this.from = from;
             this.to = to;
         }
 
-        public Move(string source)
+        public AtomicMove(string source)
         {
             string[] splitted = source.Split(new char[] { ' ', '-' });
             piece = PieceType.Pawn;
             int offset = 0;
-            if(splitted.Length == 3)
+            if (splitted.Length == 3)
             {
                 piece = PiecesExtension.GetPiece(char.ToUpper(splitted[0][0]));
                 offset = 1;
@@ -43,7 +43,7 @@ namespace Chess.src
 
         public override bool Equals(object obj)
         {
-            if (obj is Move other)
+            if (obj is AtomicMove other)
             {
                 return piece == other.piece && from.Equals(other.from) && to.Equals(other.to);
             }
@@ -58,6 +58,21 @@ namespace Chess.src
         public override int GetHashCode()
         {
             return piece.GetHashCode() + to.GetHashCode() + from.GetHashCode();
+        }
+
+        public void ExecuteMove(Field field)
+        {
+            field.ExecuteAtomicMove(this);
+        }
+
+        public IMove Reverse()
+        {
+            return AtomicReverse();
+        }
+
+        public AtomicMove AtomicReverse()
+        {
+            return new AtomicMove(piece, to, from);
         }
     }
 }

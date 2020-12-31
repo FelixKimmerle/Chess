@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Chess.src.moves;
 
 namespace Chess.src.pieces
 {
@@ -16,35 +17,35 @@ namespace Chess.src.pieces
             return PieceType.Pawn;
         }
 
-        public override HashSet<Move> GetPossibleMoves(Field field)
+        public override HashSet<IMove> GetPossibleMoves(Field field)
         {
-            HashSet<Move> moves = new HashSet<Move>();
+            HashSet<IMove> moves = new HashSet<IMove>();
 
             //Normal case
             BoardLocation oneInFront = location.Forward(pieceColor);
             if (oneInFront.IsValid() && field.IsFree(oneInFront))
             {
-                moves.Add(new Move(GetPieceType(), location, oneInFront));
+                moves.Add(new AtomicMove(GetPieceType(), location, oneInFront));
             }
 
             //Doppelschritt
             BoardLocation twoInFront = location.Forward(pieceColor, 2);
             if (twoInFront.IsValid() && field.IsFree(twoInFront) && !moved)
             {
-                moves.Add(new Move(GetPieceType(), location, twoInFront));
+                moves.Add(new AtomicMove(GetPieceType(), location, twoInFront));
             }
 
             //Schlagen
             BoardLocation left = oneInFront.Offset(-1);
             if (left.IsValid() && field.IsEnemy(left, pieceColor))
             {
-                moves.Add(new Move(GetPieceType(), location, left));
+                moves.Add(new AtomicMove(GetPieceType(), location, left));
             }
 
             BoardLocation right = oneInFront.Offset(1);
             if (right.IsValid() && field.IsEnemy(right, pieceColor))
             {
-                moves.Add(new Move(GetPieceType(), location, right));
+                moves.Add(new AtomicMove(GetPieceType(), location, right));
             }
             //TODO Add all moves https://www.wiki-schacharena.de/Bauer
             return moves;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Chess.src.moves;
 
 namespace Chess.src.pieces
 {
@@ -15,9 +16,9 @@ namespace Chess.src.pieces
             return PieceType.Knight;
         }
 
-        public override HashSet<Move> GetPossibleMoves(Field field)
+        public override HashSet<IMove> GetPossibleMoves(Field field)
         {
-            HashSet<Move> moves = new HashSet<Move>();
+            HashSet<IMove> moves = new HashSet<IMove>();
 
             BoardLocation[] destinations =
             {
@@ -38,7 +39,7 @@ namespace Chess.src.pieces
             {
                 if (destination.IsValid() && (field.IsFree(destination) || field.IsEnemy(destination, pieceColor)))
                 {
-                    moves.Add(new Move(GetPieceType(), location, destination));
+                    moves.Add(new AtomicMove(GetPieceType(), location, destination));
                 }
             }
             return moves;

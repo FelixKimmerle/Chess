@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Chess.src.moves;
 
 namespace Chess.src.pieces
 {
@@ -16,9 +17,9 @@ namespace Chess.src.pieces
         }
 
         
-        public override HashSet<Move> GetPossibleMoves(Field field)
+        public override HashSet<IMove> GetPossibleMoves(Field field)
         {
-            HashSet<Move> moves = new HashSet<Move>();
+            HashSet<IMove> moves = new HashSet<IMove>();
 
             moves.UnionWith(checkDirection(1, 0, field));
             moves.UnionWith(checkDirection(0, 1, field));
