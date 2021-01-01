@@ -22,6 +22,7 @@ namespace Chess.src
         {
             worker.DoWork += Worker_DoWork;
             worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
+            Console.Write("> ");
             worker.RunWorkerAsync();
         }
 
@@ -64,7 +65,6 @@ namespace Chess.src
 
         private void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Console.Write("> ");
             string line = Console.ReadLine();
             e.Result = line;
         }
@@ -94,6 +94,8 @@ namespace Chess.src
             move.ExecuteMove(field);
             Console.WriteLine(move);
             field.Print();
+            Console.Write("> ");
+
         }
 
         public void Save(string filename)

@@ -14,12 +14,7 @@ namespace Chess.src
 
         public Field()
         {
-            //Clean();
-            Add(new Rook(new BoardLocation(0, 7), Piece.PieceColor.Black));
-            Add(new Rook(new BoardLocation(0, 0), Piece.PieceColor.White));
-            Add(new Rook(new BoardLocation(7, 7), Piece.PieceColor.Black));
-            Add(new Rook(new BoardLocation(7, 0), Piece.PieceColor.White));
-
+            Clean();
         }
         public void Clean()
         {
@@ -177,7 +172,7 @@ namespace Chess.src
                 }
                 if (printLocation)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    Console.ForegroundColor = ConsoleColor.Cyan;
                     BoardLocation location = new BoardLocation(x, 7 - y);
                     Console.Write(location.ToString() + " ");
                 }
