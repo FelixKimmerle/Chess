@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using SFML.Window;
+using System;
 using SFML.Graphics;
-using SFML.System;
+using SFML.Window;
 
-namespace Chess.src.rendering
+namespace Chess.src.core.rendering
 {
-    class ChessWindow
+    public class ChessWindow
     {
-        private RenderGame renderGame;
+        GameWidget gameWidget;
         public void Run()
         {
             ContextSettings contextSettings = new ContextSettings(64,64,16);
@@ -24,16 +21,22 @@ namespace Chess.src.rendering
             window.MouseButtonPressed += OnMouseButtonPressed;
             window.MouseButtonReleased += OnMouseButtonReleased;
             window.MouseMoved += OnMouseMove;
+            window.KeyPressed += OnKeyPressed;
 
-            renderGame = new RenderGame(new SFML.System.Vector2f(800,800));
+            gameWidget = new GameWidget(new SFML.System.Vector2f(800,800));
 
             while (window.IsOpen)
             {
                 window.DispatchEvents();
                 window.Clear(Color.Black);
-                window.Draw(renderGame);
+                window.Draw(gameWidget);
                 window.Display();
             }
+        }
+
+        private void OnKeyPressed(object sender, KeyEventArgs e)
+        {
+            gameWidget.KeyPressed(e);
         }
 
         private void Window_KeyPressed(object sender, SFML.Window.KeyEventArgs e)
@@ -55,25 +58,25 @@ namespace Chess.src.rendering
         {
             RenderWindow window = (RenderWindow)sender;
             window.SetView(new View(new FloatRect(0, 0, e.Width, e.Height)));
-            renderGame.Resize(new SFML.System.Vector2f(e.Width, e.Height));
+            gameWidget.Resize(new SFML.System.Vector2f(e.Width, e.Height));
         }
 
         private void OnMouseButtonPressed(object sender, MouseButtonEventArgs e)
         {
             RenderWindow window = (RenderWindow)sender;
-            renderGame.MouseButtonPressed(new SFML.System.Vector2f(e.X, e.Y), e.Button);
+            gameWidget.MouseButtonPressed(new SFML.System.Vector2f(e.X, e.Y), e.Button);
         }
 
         private void OnMouseButtonReleased(object sender, MouseButtonEventArgs e)
         {
             RenderWindow window = (RenderWindow)sender;
-            renderGame.MouseButtonReleased(new SFML.System.Vector2f(e.X, e.Y), e.Button);
+            gameWidget.MouseButtonReleased(new SFML.System.Vector2f(e.X, e.Y), e.Button);
         }
 
         private void OnMouseMove(object sender, MouseMoveEventArgs e)
         {
             RenderWindow window = (RenderWindow)sender;
-            renderGame.MouseMove(new SFML.System.Vector2f(e.X, e.Y));
+            gameWidget.MouseMove(new SFML.System.Vector2f(e.X, e.Y));
         }
     }
 }

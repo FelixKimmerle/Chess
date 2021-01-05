@@ -1,3 +1,0 @@
-P a2-a4 # P d7-d5
-P g2-g4 # K d8-d7
-R a1-a3 # 

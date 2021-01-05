@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System;
 
-namespace Chess.src.pieces
+namespace Chess.src.core.pieces
 {
     public enum PieceType
     {
@@ -15,12 +13,18 @@ namespace Chess.src.pieces
         Blank,
     }
 
-    public static class PiecesExtension
+    public static class PieceTypeExtension
     {
         private static readonly char[] letters = { 'K', 'Q', 'N', 'B', 'R', 'P' };
+        private static readonly float[] points = { 0, 9, 3, 3, 5, 1, 0 };
         public static char GetLetter(this PieceType piece)
         {
             return letters[(int)piece];
+        }
+
+        public static float GetPoints(this PieceType piece)
+        {
+            return points[(int)piece];
         }
 
         public static PieceType GetPiece(char letter)
@@ -45,6 +49,4 @@ namespace Chess.src.pieces
             throw new ArgumentException("The character: " + letter + " is not associated with a piece.");
         }
     }
-
-
 }
