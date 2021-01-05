@@ -30,7 +30,7 @@ namespace Chess.src.core.pieces
             }
             if (!WasMoved())
             {
-                //Long Rochade
+                //Short Rochade
                 Location current = location.Offset(1, 0);
                 while (current.IsValid() && board.IsFree(current))
                 {
@@ -40,10 +40,10 @@ namespace Chess.src.core.pieces
                 Piece other = board.Get(current);
                 if (current.IsValid() && other is Rook shortRook && !shortRook.WasMoved())
                 {
-                    moves.Add(new Castling(false, pieceColor));
+                    moves.Add(new Castling(true, pieceColor));
                 }
 
-                //Short Rochade
+                //Long Rochade
                 current = location.Offset(-1, 0);
 
                 while (current.IsValid() && board.IsFree(current))
@@ -54,7 +54,7 @@ namespace Chess.src.core.pieces
                 other = board.Get(current);
                 if (current.IsValid() && other is Rook longRook && !longRook.WasMoved())
                 {
-                    moves.Add(new Castling(true, pieceColor));
+                    moves.Add(new Castling(false, pieceColor));
                 }
             }
             return moves;

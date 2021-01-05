@@ -181,11 +181,12 @@ namespace Chess.src.core.rendering
 
         private void AnimateMove(Piece piece, Move move, bool reversed = false)
         {
-            animatedPieces.Add(piece);
             List<AtomicMove> atomicMoves = reversed ? move.Reverse() : move.GetAtomicMoves();
             foreach (AtomicMove atomicMove in atomicMoves)
             {
-                animations.Add(new Animation(0.5f, atomicMove, piece, tileSize));
+                Piece atomicPiece = board.Get(atomicMove.GetDestination());
+                animatedPieces.Add(atomicPiece);
+                animations.Add(new Animation(0.5f, atomicMove, atomicPiece, tileSize));
             }
         }
 
