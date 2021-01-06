@@ -41,11 +41,11 @@ namespace Chess.src.core.rendering
             predicition.Resize(new Vector2f(tileSize / 4f, tileSize * 8));
 
             rectangleShape.Size = new Vector2f(tileSize * 0.5f, tileSize * 0.5f);
-            rectangleShape.FillColor = new Color(255, 0, 0, 50);
+            rectangleShape.FillColor = new Color(255, 0, 0, 100);
             rectangleShape.Origin = rectangleShape.Size / 2f;
 
             circleShape.Radius = tileSize * 0.2f;
-            circleShape.FillColor = new Color(0, 255, 0, 50);
+            circleShape.FillColor = new Color(255, 200, 00, 200);
             circleShape.Origin = new Vector2f(circleShape.Radius, circleShape.Radius);
 
             if (size.X > size.Y)

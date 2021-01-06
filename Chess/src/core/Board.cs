@@ -39,8 +39,8 @@ namespace Chess.src.core
             //Pawns
             for (int i = 0; i < 8; i++)
             {
-                //Add(new Pawn(new Location(i, 6), PieceColor.Black));
-                //Add(new Pawn(new Location(i, 1), PieceColor.White));
+                Add(new Pawn(new Location(i, 6), PieceColor.Black));
+                Add(new Pawn(new Location(i, 1), PieceColor.White));
             }
 
             //Rook
@@ -48,7 +48,7 @@ namespace Chess.src.core
             Add(new Rook(new Location(0, 0), PieceColor.White));
             Add(new Rook(new Location(7, 7), PieceColor.Black));
             Add(new Rook(new Location(7, 0), PieceColor.White));
-            /*
+            
             //Knight
             Add(new Knight(new Location(1, 7), PieceColor.Black));
             Add(new Knight(new Location(1, 0), PieceColor.White));
@@ -60,7 +60,7 @@ namespace Chess.src.core
             Add(new Bishop(new Location(2, 0), PieceColor.White));
             Add(new Bishop(new Location(5, 7), PieceColor.Black));
             Add(new Bishop(new Location(5, 0), PieceColor.White));
-            */
+            
             //King
             Add(new King(new Location(4, 7), PieceColor.Black));
             Add(new King(new Location(4, 0), PieceColor.White));
