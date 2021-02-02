@@ -167,7 +167,6 @@ namespace Chess.src.core.rendering
                 {
                     move = new AtomicMove(pickedPiece.GetPieceType(), startMove, destination);
                 }
-                System.Console.WriteLine("Trigger move");
                 if (position.Do(move))
                 {
                     AnimateMove(pickedPiece, move);

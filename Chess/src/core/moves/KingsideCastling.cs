@@ -10,5 +10,10 @@ namespace Chess.src.core.moves
             kingMove = new AtomicMove(PieceType.King, new Location(4, rank), new Location(6, rank));
             rookMove = new AtomicMove(PieceType.Rook, new Location(7, rank), new Location(5, rank));
         }
+
+        public override string ToString()
+        {
+            return "0-0";
+        }
     }
 }

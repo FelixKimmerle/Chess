@@ -30,6 +30,11 @@ namespace Chess.src.core.moves
             destination = new Location(splitted[1 + offset]);
         }
 
+        public PieceType GetPieceType()
+        {
+            return piece;
+        }
+
         public bool IsDoublePush()
         {
             return piece == PieceType.Pawn && source.EulerDistance(destination) == 2;

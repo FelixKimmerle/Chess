@@ -15,8 +15,8 @@ namespace Chess.src.core
         private readonly Stack<Piece> capturedPieces = new Stack<Piece>();
         private PieceColor turn = PieceColor.White;
         private readonly List<Move> moves = new List<Move>();
-        private int halveMoveClock = 0;
-        private Stack<int> halveMoveStack = new Stack<int>();
+        private int HalveMoveClock = 0;
+        private Stack<int> HalveMoveStack = new Stack<int>();
 
 
         //private HelperData whiteData;
@@ -26,7 +26,13 @@ namespace Chess.src.core
         {
             //whiteData = new HelperData(this, PieceColor.White);
             //blackData = new HelperData(this, PieceColor.Black);
-            Clean();
+            //Clean();
+            Add(new Queen(new Location("c6"), PieceColor.White));
+            Add(new Queen(new Location("e6"), PieceColor.White));
+            Add(new Queen(new Location("c4"), PieceColor.White));
+            Add(new Queen(new Location("e4"), PieceColor.Black));
+            Update();
+
         }
 
         public PieceColor GetTurn()
@@ -124,6 +130,7 @@ namespace Chess.src.core
             Piece piece = Get(move.GetFirstSource());
             if (piece.IsPossible(move))
             {
+                Console.WriteLine(AlgebraicNotation(move));
                 moves.Add(move);
                 turn = turn.Other();
                 ExecuteMove(move);
@@ -139,7 +146,7 @@ namespace Chess.src.core
         {
             if (moves.Count > 0)
             {
-                Move move = moves[moves.Count - 1];
+                Move move = moves[^1];
                 moves.RemoveAt(moves.Count - 1);
                 turn = turn.Other();
                 ExecuteMove(move, true);
@@ -339,6 +346,90 @@ namespace Chess.src.core
             }
         }
 
+        public string AlgebraicNotation(Move move)
+        {
+
+            if (move is AtomicMove atomicMove)
+            {
+                StringBuilder builder = new StringBuilder();
+
+                Location source = atomicMove.GetSource();
+                Location destination = atomicMove.GetDestination();
+                PieceType pieceType = atomicMove.GetPieceType();
+                Piece movedPiece = Get(source);
+
+                if(pieceType != PieceType.Pawn)
+                {
+                    builder.Append(pieceType.GetLetter());
+                    HashSet<Piece> pieces = (turn == PieceColor.White) ? whitePieces : blackPieces;
+                    bool sameDest = false;
+                    bool sameFile = false;
+                    bool sameRank = false;
+
+                    foreach (Piece piece in pieces)
+                    {
+                        if(piece != movedPiece)
+                        {
+                            HashSet<Move> moves = piece.GetPossibleMoves();
+                            foreach(Move otherMove in moves)
+                            {
+                                Console.WriteLine(otherMove.GetFirstDestination() + " " + destination);
+                                if(otherMove.GetFirstDestination().Equals(destination))
+                                {
+                                    Location otherSource = otherMove.GetFirstSource();
+                                    sameDest = true;
+                                    if(source.GetFile() == otherSource.GetFile())
+                                    {
+                                        sameFile = true;
+                                    }
+                                    if (source.GetRank() == otherSource.GetRank())
+                                    {
+                                        sameRank = true;
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (sameDest)
+                    {
+                        if (!(sameFile && !sameRank))
+                        {
+                            builder.Append(source.GetFileChar());
+                        }
+
+                        if(sameFile)
+                        {
+                            builder.Append(source.GetRankChar());
+                        }
+                    }
+                }
+                else
+                {
+                    //Pawn
+                    if(Get(destination) != null)
+                    {
+                        builder.Append(source.GetFileChar());
+                    }
+                }
+
+                if(Get(destination) != null)
+                {
+                    builder.Append('x');
+                }
+
+                builder.Append(destination);
+
+                return builder.ToString();
+            }
+            else
+            {
+                return move.ToString();
+            }
+
+        }
+
         public string ToFen()
         {
             StringBuilder builder = new StringBuilder();
@@ -442,7 +533,7 @@ namespace Chess.src.core
                 builder.Append("-");
             }
             builder.Append(" ");
-            builder.Append(halveMoveClock);
+            builder.Append(HalveMoveClock);
             builder.Append(" ");
             builder.Append(moves.Count / 2);
 

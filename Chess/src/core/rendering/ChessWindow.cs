@@ -9,7 +9,7 @@ namespace Chess.src.core.rendering
         GameWidget gameWidget;
         public void Run()
         {
-            ContextSettings contextSettings = new ContextSettings(64,64,16);
+            ContextSettings contextSettings = new ContextSettings(64,64,4);
             VideoMode mode = new VideoMode(800, 800);
             RenderWindow window = new RenderWindow(mode, "Chess", Styles.Default);
             window.SetVerticalSyncEnabled(true);

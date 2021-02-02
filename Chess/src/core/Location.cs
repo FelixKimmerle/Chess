@@ -30,6 +30,16 @@ namespace Chess.src.core
             return rank;
         }
 
+        public char GetFileChar()
+        {
+            return (char)('a' + file);
+        }
+
+        public char GetRankChar()
+        {
+            return (char)('1' + rank);
+        }
+
         public bool IsValid()
         {
             return file >= 0 && file <= 7 && rank >= 0 && rank <= 7;
