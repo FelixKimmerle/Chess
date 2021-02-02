@@ -9,19 +9,19 @@ namespace Chess.src.core.pieces
         {
         }
 
-        protected override HashSet<Move> CalculatePossibleMoves(Board board)
+        protected override HashSet<Move> CalculatePossibleMoves(Position position)
         {
             HashSet<Move> moves = new HashSet<Move>();
 
             //Normal case
             Location oneInFront = location.Forward(pieceColor);
-            if (oneInFront.IsValid() && board.IsFree(oneInFront))
+            if (oneInFront.IsValid() && position.IsFree(oneInFront))
             {
                 moves.Add(new AtomicMove(pieceType, location, oneInFront));
 
                 //Doppelschritt
                 Location twoInFront = location.Forward(pieceColor, 2);
-                if (twoInFront.IsValid() && board.IsFree(twoInFront) && !WasMoved())
+                if (twoInFront.IsValid() && position.IsFree(twoInFront) && !WasMoved())
                 {
                     moves.Add(new AtomicMove(pieceType, location, twoInFront));
                 }
@@ -31,13 +31,13 @@ namespace Chess.src.core.pieces
 
             //Schlagen
             Location left = oneInFront.Offset(-1);
-            if (left.IsValid() && board.IsEnemy(left, pieceColor))
+            if (left.IsValid() && position.IsEnemy(left, pieceColor))
             {
                 moves.Add(new AtomicMove(pieceType, location, left));
             }
 
             Location right = oneInFront.Offset(1);
-            if (right.IsValid() && board.IsEnemy(right, pieceColor))
+            if (right.IsValid() && position.IsEnemy(right, pieceColor))
             {
                 moves.Add(new AtomicMove(pieceType, location, right));
             }

@@ -9,7 +9,7 @@ namespace Chess.src.core.pieces
         {
         }
 
-        protected override HashSet<Move> CalculatePossibleMoves(Board board)
+        protected override HashSet<Move> CalculatePossibleMoves(Position position)
         {
             HashSet<Move> moves = new HashSet<Move>();
 
@@ -30,7 +30,7 @@ namespace Chess.src.core.pieces
 
             foreach (Location destination in destinations)
             {
-                if (destination.IsValid() && (board.IsFree(destination) || board.IsEnemy(destination, pieceColor)))
+                if (destination.IsValid() && (position.IsFree(destination) || position.IsEnemy(destination, pieceColor)))
                 {
                     moves.Add(new AtomicMove(pieceType, location, destination));
                 }

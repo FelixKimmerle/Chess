@@ -8,8 +8,8 @@ namespace Chess.src.core.rendering
 {
     class Arrow : Drawable
     {
-        Body body;
-        Top top;
+        private Body body;
+        private Top top;
 
         public Color FillColor { get { return body.FillColor; } set { body.FillColor = value; top.FillColor = value; } }
         public Color OutlineColor { get { return body.OutlineColor; } set { body.OutlineColor = value; top.OutlineColor = value; } }
@@ -36,7 +36,7 @@ namespace Chess.src.core.rendering
 
         class Top : Shape
         {
-            Vector2f[] vertices;
+            private Vector2f[] vertices;
 
             public Top(Vector2f[] vertices)
             {
@@ -73,8 +73,8 @@ namespace Chess.src.core.rendering
 
         public void Draw(RenderTarget target, RenderStates states)
         {
-            target.Draw(body,states);
-            target.Draw(top,states);
+            target.Draw(body, states);
+            target.Draw(top, states);
         }
     }
 }

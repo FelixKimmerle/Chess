@@ -15,7 +15,8 @@ namespace Chess.src.core.moves
         {
             this.capture = true;
         }
-
+        
+    
         public Location GetFirstSource()
         {
             return GetAtomicMoves()[0].GetSource();

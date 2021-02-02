@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Chess.src.core.engine;
 using Chess.src.core.moves;
 using Chess.src.core.pieces;
 using SFML.Graphics;
@@ -11,8 +10,7 @@ namespace Chess.src.core.rendering
 {
     public class GameWidget : Drawable
     {
-        private readonly Game game = new Game();
-        private readonly Board board;
+        private readonly Position position = new Position();
         private readonly Sprite[] sprites = new Sprite[12];
         private readonly Sprite blankLight;
         private readonly Sprite blankDark;
@@ -24,21 +22,21 @@ namespace Chess.src.core.rendering
         private Vector2f mousePos = new Vector2f(0, 0);
         private Location startMove;
         private Text text;
-        private HelperData whiteData;
-        private HelperData blackData;
+        //private HelperData whiteData;
+        //private HelperData blackData;
         Font font = new Font("res/arial.ttf");
         RectangleShape rectangleShape = new RectangleShape();
         CircleShape circleShape = new CircleShape();
 
-        PredicitionWidget predicition;
+        //PredicitionWidget predicition;
 
         HashSet<Piece> animatedPieces = new HashSet<Piece>();
 
         List<Animation> animations = new List<Animation>();
         public void Resize(Vector2f size)
         {
-            tileSize = Math.Min(size.X / 8.25f, size.Y / 8.25f);
-            predicition.Resize(new Vector2f(tileSize / 4f, tileSize * 8));
+            tileSize = Math.Min(size.X / 8f, size.Y / 8f);
+            //predicition.Resize(new Vector2f(tileSize / 4f, tileSize * 8));
 
             rectangleShape.Size = new Vector2f(tileSize * 0.5f, tileSize * 0.5f);
             rectangleShape.FillColor = new Color(255, 0, 0, 100);
@@ -74,10 +72,9 @@ namespace Chess.src.core.rendering
         }
         public GameWidget(Vector2f size)
         {
-            board = game.GetBoard();
-            whiteData = board.GetWhiteData();
-            blackData = board.GetBlackData();
-            predicition = new PredicitionWidget(size);
+            //board = game.GetBoard();
+            //whiteData = board.GetWhiteData();
+            //blackData = board.GetBlackData();
 
             for (int i = 0; i < 6; i++)
             {
@@ -94,8 +91,10 @@ namespace Chess.src.core.rendering
             blankLight = new Sprite(new Texture("res/128px/square brown light_png_shadow_128px.png"));
             blankDark = new Sprite(new Texture("res/128px/square brown dark_png_shadow_128px.png"));
 
+            //blankLight = new Sprite(new Texture(new Image(1,1,new Color(255,255,255))));
+            //blankDark = new Sprite(new Texture(new Image(1,1,new Color(100,100,100))));
+
             Resize(size);
-            predicition.SetValue(0);
 
         }
 
@@ -106,7 +105,7 @@ namespace Chess.src.core.rendering
 
         private int GetId(Location location)
         {
-            return (7 - location.GetY()) * 8 + location.GetX();
+            return (7 - location.GetRank()) * 8 + location.GetFile();
         }
 
         public void MouseMove(Vector2f position)
@@ -114,13 +113,13 @@ namespace Chess.src.core.rendering
             mousePos = position - offset;
         }
 
-        public void MouseButtonPressed(Vector2f position, Mouse.Button button)
+        public void MouseButtonPressed(Vector2f location, Mouse.Button button)
         {
-            position = position - offset;
-            int x = (int)(position.X / tileSize);
-            int y = (int)(position.Y / tileSize);
+            location = location - offset;
+            int x = (int)(location.X / tileSize);
+            int y = (int)(location.Y / tileSize);
 
-            Piece piece = board.Get(x, 7 - y);
+            Piece piece = position.Get(x, 7 - y);
             if (piece != null)
             {
                 if (button == Mouse.Button.Middle)
@@ -130,7 +129,7 @@ namespace Chess.src.core.rendering
                 }
                 else if (button == Mouse.Button.Left)
                 {
-                    if (piece.GetPieceColor() == game.GetTurn())
+                    if (piece.GetPieceColor() == position.GetTurn())
                     {
                         startMove = new Location(x, 7 - y);
                         pickedPiece = piece;
@@ -140,41 +139,45 @@ namespace Chess.src.core.rendering
             }
         }
 
-        public void MouseButtonReleased(Vector2f position, Mouse.Button button)
+        public void MouseButtonReleased(Vector2f location, Mouse.Button button)
         {
-            position = position - offset;
-            int x = (int)(position.X / tileSize);
-            int y = (int)(position.Y / tileSize);
+            location = location - offset;
+            int x = (int)(location.X / tileSize);
+            int y = (int)(location.Y / tileSize);
 
-            if (button == Mouse.Button.Left && pickedPiece != null)
+            Location destination = new Location(x, 7 - y);
+            if (button == Mouse.Button.Left && pickedPiece != null && !startMove.Equals(destination))
             {
-                Location destination = new Location(x, 7 - y);
                 Move move;
-                if (pickedPiece.GetPieceType() == PieceType.King && board.Get(destination) == null && startMove.EulerDistance(destination) > 1 && pickedPiece.GetLocation().GetY() == destination.GetY())
+                if (pickedPiece.GetPieceType() == PieceType.King && position.Get(destination) == null && startMove.EulerDistance(destination) > 1 && pickedPiece.GetLocation().GetRank() == destination.GetRank())
                 {
                     //Rochade
-                    if (startMove.GetX() < destination.GetX())
+                    if (startMove.GetFile() < destination.GetFile())
                     {
                         //Small
-                        move = new Castling(true, game.GetTurn());
+                        move = new KingsideCastling(position.GetTurn());
                     }
                     else
                     {
                         //Big
-                        move = new Castling(false, game.GetTurn());
+                        move = new QueensideCastling(position.GetTurn());
                     }
                 }
                 else
                 {
                     move = new AtomicMove(pickedPiece.GetPieceType(), startMove, destination);
                 }
-                if (game.Do(move))
+                System.Console.WriteLine("Trigger move");
+                if (position.Do(move))
                 {
-                    predicition.SetValue(HelperData.Ratio(whiteData, blackData));
                     AnimateMove(pickedPiece, move);
                 }
 
                 SelectPiece(pickedPiece);
+                pickedPiece = null;
+            }
+            else
+            {
                 pickedPiece = null;
             }
         }
@@ -184,7 +187,7 @@ namespace Chess.src.core.rendering
             List<AtomicMove> atomicMoves = reversed ? move.Reverse() : move.GetAtomicMoves();
             foreach (AtomicMove atomicMove in atomicMoves)
             {
-                Piece atomicPiece = board.Get(atomicMove.GetDestination());
+                Piece atomicPiece = position.Get(atomicMove.GetDestination());
                 animatedPieces.Add(atomicPiece);
                 animations.Add(new Animation(0.5f, atomicMove, atomicPiece, tileSize));
             }
@@ -198,8 +201,8 @@ namespace Chess.src.core.rendering
             {
                 foreach (Move move in piece.GetPossibleMoves())
                 {
-                    Vector2f source = new Vector2f(move.GetFirstSource().GetX() * tileSize, (7 - move.GetFirstSource().GetY()) * tileSize);
-                    Vector2f destination = new Vector2f(move.GetFirstDestination().GetX() * tileSize, (7 - move.GetFirstDestination().GetY()) * tileSize);
+                    Vector2f source = new Vector2f(move.GetFirstSource().GetFile() * tileSize, (7 - move.GetFirstSource().GetRank()) * tileSize);
+                    Vector2f destination = new Vector2f(move.GetFirstDestination().GetFile() * tileSize, (7 - move.GetFirstDestination().GetRank()) * tileSize);
                     arrows.Add(new Arrow(10, source, destination, 30, 0));
                     arrows[arrows.Count - 1].FillColor = new Color(0, 128, 0);
                 }
@@ -210,17 +213,16 @@ namespace Chess.src.core.rendering
         {
             if (e.Control && e.Code == Keyboard.Key.Z)
             {
-                Move undoMove = game.Undo();
+                Move undoMove = position.Undo();
                 if (undoMove != null)
                 {
-                    predicition.SetValue(HelperData.Ratio(whiteData, blackData));
-                    AnimateMove(board.Get(undoMove.GetFirstSource()), undoMove, true);
+                    AnimateMove(position.Get(undoMove.GetFirstSource()), undoMove, true);
                 }
                 SelectPiece(selectedPiece);
             }
         }
 
-        public void DrawPiece(Piece piece, Vector2f position, RenderTarget target, RenderStates states, bool selected = false, bool picked = false)
+        public void DrawPiece(Piece piece, Vector2f screenPosition, RenderTarget target, RenderStates states, bool selected = false, bool picked = false)
         {
             PieceColor pieceColor = piece.GetPieceColor();
             PieceType pieceType = piece.GetPieceType();
@@ -235,12 +237,12 @@ namespace Chess.src.core.rendering
                 sprite.Color = Color.White;
             }
 
-            if (pieceColor == game.GetTurn())
+            if (pieceColor == position.GetTurn())
             {
                 sprite.Color = new Color(255, 255, 200);
             }
 
-            sprite.Position = position;
+            sprite.Position = screenPosition;
 
             RenderStates pieceStates = new RenderStates(states);
             if (!picked)
@@ -263,15 +265,13 @@ namespace Chess.src.core.rendering
             RenderStates shapeStates = new RenderStates(states);
             shapeStates.Transform.Translate(tileSize / 2f, tileSize / 2f);
 
-
-
             for (int y = 0; y < 8; y++)
             {
                 for (int x = 0; x < 8; x++)
                 {
                     Location location = new Location(x, 7 - y);
-                    Piece piece = board.Get(location);
-                    Vector2f position = new Vector2f(x * tileSize, y * tileSize);
+                    Piece piece = position.Get(location);
+                    Vector2f screenPosition = new Vector2f(x * tileSize, y * tileSize);
                     Sprite sprite;
                     if ((x + y % 2) % 2 == 0)
                     {
@@ -289,10 +289,10 @@ namespace Chess.src.core.rendering
                     bool drawRectangle = false;
                     bool drawCircle = false;
 
-                    rectangleShape.Position = position;
-                    circleShape.Position = position;
+                    rectangleShape.Position = screenPosition;
+                    circleShape.Position = screenPosition;
 
-
+                    /*
                     if (whiteData.Attacks(location))
                     {
                         if (piece != null)
@@ -310,15 +310,15 @@ namespace Chess.src.core.rendering
                         {
                             if (game.GetTurn().IsBlack())
                             {
-                                drawRectangle = true;
+                                //drawRectangle = true;
+                                sprite.Color = Color.Magenta;
                             }
                             else
                             {
-                                drawCircle = true;
+                                //drawCircle = true;
+                                sprite.Color = Color.Yellow;
                             }
-
                         }
-
                     }
 
                     if (blackData.Attacks(location))
@@ -338,11 +338,27 @@ namespace Chess.src.core.rendering
                         {
                             if (game.GetTurn().IsWhite())
                             {
-                                drawRectangle = true;
+                                //drawRectangle = true;
+                                if (sprite.Color != Color.White)
+                                {
+                                    sprite.Color = new Color(255, 165, 0);
+                                }
+                                else
+                                {
+                                    sprite.Color = Color.Magenta;
+                                }
                             }
                             else
                             {
-                                drawCircle = true;
+                                //drawCircle = true;
+                                if (sprite.Color != Color.White)
+                                {
+                                    sprite.Color = new Color(255, 165, 0);
+                                }
+                                else
+                                {
+                                    sprite.Color = Color.Yellow;
+                                }
                             }
 
                         }
@@ -362,9 +378,7 @@ namespace Chess.src.core.rendering
                     }
                     */
 
-
-
-                    sprite.Position = position;
+                    sprite.Position = screenPosition;
                     target.Draw(sprite, states);
 
                     if (drawRectangle)
@@ -380,7 +394,7 @@ namespace Chess.src.core.rendering
 
 
                     text.DisplayedString = location.ToString();
-                    text.Position = position + new Vector2f(tileSize / 20, tileSize / 20);
+                    text.Position = screenPosition + new Vector2f(tileSize / 20, tileSize / 20);
                     target.Draw(text, states);
 
                 }
@@ -396,11 +410,11 @@ namespace Chess.src.core.rendering
                 for (int x = 0; x < 8; x++)
                 {
                     Location location = new Location(x, 7 - y);
-                    Piece piece = board.Get(location);
-                    Vector2f position = new Vector2f(x * tileSize, y * tileSize);
+                    Piece piece = position.Get(location);
+                    Vector2f screenPosition = new Vector2f(x * tileSize, y * tileSize);
                     if (piece != null && piece != pickedPiece && (!animatedPieces.Contains(piece)))
                     {
-                        DrawPiece(piece, position, target, states, selectedPiece == piece);
+                        DrawPiece(piece, screenPosition, target, states, selectedPiece == piece);
                     }
                 }
 
@@ -423,9 +437,6 @@ namespace Chess.src.core.rendering
             }
             animations.RemoveAll(item => item.IsFinished());
             states.Transform.Translate(tileSize * 8, 0);
-            target.Draw(predicition, states);
-
-
         }
     }
 }

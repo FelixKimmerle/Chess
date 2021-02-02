@@ -18,9 +18,9 @@ namespace Chess.src.core.pieces
             this.pieceType = pieceType;
         }
 
-        public void Update(Board board)
+        public void Update(Position position)
         {
-            possibleMoves = CalculatePossibleMoves(board);
+            possibleMoves = CalculatePossibleMoves(position);
         }
 
         public bool IsPossible(Move move)
@@ -58,21 +58,21 @@ namespace Chess.src.core.pieces
             this.location = move.GetSource();
         }
 
-        protected abstract HashSet<Move> CalculatePossibleMoves(Board board);
+        protected abstract HashSet<Move> CalculatePossibleMoves(Position position);
 
-        protected HashSet<Move> checkDirection(int x, int y, Board board)
+        protected HashSet<Move> checkDirection(int x, int y, Position position)
         {
             HashSet<Move> moves = new HashSet<Move>();
 
             Location current = location.Offset(x, y);
 
-            while (current.IsValid() && board.IsFree(current))
+            while (current.IsValid() && position.IsFree(current))
             {
                 moves.Add(new AtomicMove(pieceType, location, current));
                 current = current.Offset(x, y);
             }
 
-            if (board.IsEnemy(current, pieceColor))
+            if (position.IsEnemy(current, pieceColor))
             {
                 moves.Add(new AtomicMove(pieceType, location, current));
             }

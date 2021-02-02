@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using Chess.src.core.moves;
 using Chess.src.core.pieces;
 
-namespace Chess.src.core.engine
+namespace Chess.src.core
 {
     public class HelperData
     {
-        Board board;
+        Position position;
 
         private HashSet<Location> attacking = new HashSet<Location>();
         private HashSet<Piece> piecesAttacking = new HashSet<Piece>();
@@ -37,17 +37,17 @@ namespace Chess.src.core.engine
             return ((white.points + whiteBonus) / 42f) - ((black.points + blackBonus) / 42f);
         }
 
-        public HelperData(Board board, PieceColor color)
+        public HelperData(Position position, PieceColor color)
         {
             this.color = color;
-            this.board = board;
+            this.position = position;
             if (color.IsWhite())
             {
-                this.pieces = board.GetWhitePieces();
+                this.pieces = position.GetWhitePieces();
             }
             else
             {
-                this.pieces = board.GetBlackPieces();
+                this.pieces = position.GetBlackPieces();
             }
         }
 
@@ -78,9 +78,9 @@ namespace Chess.src.core.engine
                     {
                         Location destination = atomicMove.GetDestination();
                         attacking.Add(destination);
-                        if (board.IsEnemy(destination, color))
+                        if (position.IsEnemy(destination, color))
                         {
-                            piecesAttacking.Add(board.Get(destination));
+                            piecesAttacking.Add(position.Get(destination));
                         }
                     }
                 }

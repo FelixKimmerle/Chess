@@ -26,5 +26,23 @@ namespace Chess.src.core.pieces
         {
             return pieceColor == PieceColor.Black;
         }
+
+        public static char ToChar(this PieceColor pieceColor)
+        {
+            if(pieceColor == PieceColor.White)
+            {
+                return 'b';
+            }
+            return 'w';
+        }
+
+        public static int GetBackRank(this PieceColor pieceColor)
+        {
+            if(pieceColor == PieceColor.Black)
+            {
+                return 7;
+            }
+            return 0;
+        }
     }
 }

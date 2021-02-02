@@ -5,75 +5,75 @@ namespace Chess.src.core
 {
     public class Location
     {
-        private readonly int x;
-        private readonly int y;
+        private readonly int file;
+        private readonly int rank;
 
-        public Location(int x, int y)
+        public Location(int file, int rank)
         {
-            this.x = x;
-            this.y = y;
+            this.file = file;
+            this.rank = rank;
         }
 
         public Location(string source)
         {
-            x = char.ToLower(source[0]) - (int)'a';
-            y = source[1] - (int)'0' - 1;
+            file = char.ToLower(source[0]) - (int)'a';
+            rank = source[1] - (int)'0' - 1;
         }
 
-        public int GetX()
+        public int GetFile()
         {
-            return x;
+            return file;
         }
 
-        public int GetY()
+        public int GetRank()
         {
-            return y;
+            return rank;
         }
 
         public bool IsValid()
         {
-            return x >= 0 && x <= 7 && y >= 0 && y <= 7;
+            return file >= 0 && file <= 7 && rank >= 0 && rank <= 7;
         }
 
         public int EulerDistance(Location location)
         {
-            return Math.Abs(x - location.x) + Math.Abs(y - location.y);
+            return Math.Abs(file - location.file) + Math.Abs(rank - location.rank);
         }
 
         public Location Forward(PieceColor pieceColor, int number = 1)
         {
             if (pieceColor == PieceColor.White)
             {
-                return new Location(x, y + number);
+                return new Location(file, rank + number);
             }
             else
             {
-                return new Location(x, y - number);
+                return new Location(file, rank - number);
             }
         }
 
         public Location Offset(int x, int y = 0)
         {
-            return new Location(this.x + x, this.y + y);
+            return new Location(this.file + x, this.rank + y);
         }
 
         public override bool Equals(object obj)
         {
             if (obj is Location other)
             {
-                return x == other.x && y == other.y;
+                return file == other.file && rank == other.rank;
             }
             return false;
         }
 
         public override string ToString()
         {
-            return "" + (char)('a' + x) + (y + 1);
+            return "" + (char)('a' + file) + (rank + 1);
         }
 
         public override int GetHashCode()
         {
-            return x.GetHashCode() + y.GetHashCode();
+            return file.GetHashCode() + rank.GetHashCode();
         }
     }
 }

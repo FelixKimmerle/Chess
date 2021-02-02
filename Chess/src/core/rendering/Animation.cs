@@ -24,8 +24,8 @@ namespace Chess.src.core.rendering
             this.piece = piece;
             this.tileSize = tileSize;
 
-            start = new Vector2f(move.GetSource().GetX() * tileSize, (7 - move.GetSource().GetY()) * tileSize);
-            dir = new Vector2f(move.GetDestination().GetX() * tileSize, (7 - move.GetDestination().GetY()) * tileSize) - start;
+            start = new Vector2f(move.GetSource().GetFile() * tileSize, (7 - move.GetSource().GetRank()) * tileSize);
+            dir = new Vector2f(move.GetDestination().GetFile() * tileSize, (7 - move.GetDestination().GetRank()) * tileSize) - start;
             length = (float)Math.Sqrt(dir.X * dir.X + dir.Y * dir.Y) / tileSize;
         }
 

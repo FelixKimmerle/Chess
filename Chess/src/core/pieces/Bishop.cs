@@ -9,14 +9,14 @@ namespace Chess.src.core.pieces
         {
         }
 
-        protected override HashSet<Move> CalculatePossibleMoves(Board board)
+        protected override HashSet<Move> CalculatePossibleMoves(Position position)
         {
             HashSet<Move> moves = new HashSet<Move>();
 
-            moves.UnionWith(checkDirection(1, 1, board));
-            moves.UnionWith(checkDirection(1, -1, board));
-            moves.UnionWith(checkDirection(-1, 1, board));
-            moves.UnionWith(checkDirection(-1, -1, board));
+            moves.UnionWith(checkDirection(1, 1, position));
+            moves.UnionWith(checkDirection(1, -1, position));
+            moves.UnionWith(checkDirection(-1, 1, position));
+            moves.UnionWith(checkDirection(-1, -1, position));
 
             return moves;
         }

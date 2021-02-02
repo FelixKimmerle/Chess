@@ -9,7 +9,7 @@ namespace Chess.src.core.pieces
         {
         }
 
-        protected override HashSet<Move> CalculatePossibleMoves(Board board)
+        protected override HashSet<Move> CalculatePossibleMoves(Position position)
         {
             HashSet<Move> moves = new HashSet<Move>();
 
@@ -21,7 +21,7 @@ namespace Chess.src.core.pieces
                     {
                         Location destination = location.Offset(x, y);
 
-                        if (destination.IsValid() && (board.IsFree(destination) || board.IsEnemy(destination, pieceColor)))
+                        if (destination.IsValid() && (position.IsFree(destination) || position.IsEnemy(destination, pieceColor)))
                         {
                             moves.Add(new AtomicMove(pieceType, location, destination));
                         }
@@ -32,29 +32,29 @@ namespace Chess.src.core.pieces
             {
                 //Short Rochade
                 Location current = location.Offset(1, 0);
-                while (current.IsValid() && board.IsFree(current))
+                while (current.IsValid() && position.IsFree(current))
                 {
                     current = current.Offset(1, 0);
                 }
 
-                Piece other = board.Get(current);
+                Piece other = position.Get(current);
                 if (current.IsValid() && other is Rook shortRook && !shortRook.WasMoved())
                 {
-                    moves.Add(new Castling(true, pieceColor));
+                    moves.Add(new KingsideCastling(pieceColor));
                 }
 
                 //Long Rochade
                 current = location.Offset(-1, 0);
 
-                while (current.IsValid() && board.IsFree(current))
+                while (current.IsValid() && position.IsFree(current))
                 {
                     current = current.Offset(-1, 0);
                 }
 
-                other = board.Get(current);
+                other = position.Get(current);
                 if (current.IsValid() && other is Rook longRook && !longRook.WasMoved())
                 {
-                    moves.Add(new Castling(false, pieceColor));
+                    moves.Add(new QueensideCastling(pieceColor));
                 }
             }
             return moves;
