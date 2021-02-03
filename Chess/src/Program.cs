@@ -4,6 +4,7 @@ using Chess.src.core.moves;
 using Chess.src.core.rendering;
 using ImGuiNET;
 using SFML.System;
+using SFML.Graphics;
 
 namespace Chess.src
 {
@@ -57,7 +58,7 @@ namespace Chess.src
                 var mode = new SFML.Window.VideoMode(800, 600);
                 var window = new SFML.Graphics.RenderWindow(mode, "SFML works!");
 
-                GuiImpl.Init(window);
+
 
 
                 window.KeyPressed += Window_KeyPressed;
@@ -67,16 +68,56 @@ namespace Chess.src
                     FillColor = SFML.Graphics.Color.Blue
                 };
                 Clock clock = new Clock();
+
+
+                window.SetActive(true);
+                window.PushGLStates();
+                GuiImpl.Init(window);
+                window.PopGLStates();
+                window.SetActive(false);
+
+
+                Image image = new Image(100, 100, Color.Red);
+                Texture texture = new Texture(image);
                 // Start the game loop
                 while (window.IsOpen)
                 {
                     // Process events
                     window.DispatchEvents();
+                    window.SetActive(true);
+                    window.PushGLStates();
+
                     GuiImpl.Update(window, clock.Restart());
+                    ImGui.BeginMainMenuBar();
+                    if (ImGui.BeginMenu("File"))
+                    {
+                        ImGui.MenuItem("Open");
+                        ImGui.EndMenu();
+                    }
+                    ImGui.EndMainMenuBar();
 
                     ImGui.Begin("Hello, world!");
-                    ImGui.Button("Look at this pretty button");
+                    if (ImGui.Button("Look at this pretty button"))
+                    {
+                        System.Console.WriteLine("Hi!");
+                    }
+
+                    System.Console.WriteLine(texture.NativeHandle);
+                    ImGui.Image(new IntPtr(texture.NativeHandle), new System.Numerics.Vector2(200, 200));
                     ImGui.End();
+
+                    ImGui.Begin("Hello, world!2");
+                    if (ImGui.Button("Look at this pretty button22"))
+                    {
+                        System.Console.WriteLine("Hi2!");
+                    }
+                    ImGui.Text("Hallo");
+                    ImGui.End();
+                    ImGui.Button("lll");
+
+                    window.PopGLStates();
+                    window.SetActive(false);
+
 
                     window.Clear();
                     window.Draw(circle);

@@ -6,6 +6,8 @@ using ImGuiNET;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
+using OpenTK.Graphics.ES20;
+using OpenTK.Windowing.Desktop;
 
 namespace Chess.src
 {
@@ -100,6 +102,17 @@ namespace Chess.src
             window.TextEntered += OnTextEntered;
             window.GainedFocus += OnGainedFocus;
             window.LostFocus += OnLostFocus;
+
+            GameWindowSettings gameWindowSettings = new GameWindowSettings();
+            NativeWindowSettings nativeWindow = new NativeWindowSettings();
+            nativeWindow.StartVisible = false;
+
+            nativeWindow.APIVersion = System.Version.Parse("3.1");
+            nativeWindow.Profile = OpenTK.Windowing.Common.ContextProfile.Any;
+
+            GameWindow gameWindow = new GameWindow(gameWindowSettings, nativeWindow);
+            gameWindow.IsVisible = false;
+
         }
 
         private static void OnMouseButtonPressed(object sender, MouseButtonEventArgs args)
@@ -248,14 +261,91 @@ namespace Chess.src
             RenderDrawLists(ImGui.GetDrawData(), ImGui.GetIO());
         }
 
-        [DllImport("RenderDataImpl.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void RenderDrawLists(ImDrawDataPtr drawData, ImGuiIOPtr io);
+        private unsafe static void RenderDrawLists(ImDrawDataPtr drawData, ImGuiIOPtr io)
+        {
+            if (drawData.CmdListsCount == 0)
+            {
+                return;
+            }
+
+            int fb_width = (int)(io.DisplaySize.X * io.DisplayFramebufferScale.X);
+            int fb_height = (int)(io.DisplaySize.Y * io.DisplayFramebufferScale.Y);
+
+            if (fb_width == 0 || fb_height == 0)
+            {
+                return;
+            }
+
+            drawData.ScaleClipRects(io.DisplayFramebufferScale);
+
+            //int lastTexutre = GL.GetInteger(GetPName.TextureBinding2D);
+            //int lastArrayBuffer = GL.GetInteger(GetPName.ArrayBufferBinding);
+            //int lastElementArrayBuffer = GL.GetInteger(GetPName.ElementArrayBufferBinding);
+
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Disable(EnableCap.CullFace);
+            GL.Disable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.ScissorTest);
+            GL.Enable(EnableCap.Texture2D);
+            GL.Disable(EnableCap.Lighting);
+            OpenTK.Graphics.ES11.GL.EnableClientState(OpenTK.Graphics.ES11.EnableCap.VertexArray);
+            OpenTK.Graphics.ES11.GL.EnableClientState(OpenTK.Graphics.ES11.EnableCap.ColorArray);
+            OpenTK.Graphics.ES11.GL.EnableClientState(OpenTK.Graphics.ES11.EnableCap.TextureCoordArray);
+
+            GL.Viewport(0, 0, fb_width, fb_height);
+
+            OpenTK.Graphics.ES11.GL.MatrixMode(OpenTK.Graphics.ES11.MatrixMode.Texture);
+            OpenTK.Graphics.ES11.GL.LoadIdentity();
+
+            OpenTK.Graphics.ES11.GL.MatrixMode(OpenTK.Graphics.ES11.MatrixMode.Projection);
+            OpenTK.Graphics.ES11.GL.LoadIdentity();
+
+            OpenTK.Graphics.ES11.GL.Ortho(0f, io.DisplaySize.X, io.DisplaySize.Y, 0f, -1f, 1f);
+
+            OpenTK.Graphics.ES11.GL.MatrixMode(OpenTK.Graphics.ES11.MatrixMode.Modelview);
+            OpenTK.Graphics.ES11.GL.LoadIdentity();
+            //System.Console.WriteLine("-----------------------------------");
+            //System.Console.WriteLine(drawData.CmdListsCount);
+            for (int n = 0; n < drawData.CmdListsCount; n++)
+            {
+                ImDrawListPtr cmdList = drawData.CmdListsRange[n];
+                OpenTK.Graphics.ES11.GL.VertexPointer(2, OpenTK.Graphics.ES11.VertexPointerType.Float, Unsafe.SizeOf<ImDrawVert>(), cmdList.VtxBuffer.Data + 0);
+                OpenTK.Graphics.ES11.GL.TexCoordPointer(2, OpenTK.Graphics.ES11.TexCoordPointerType.Float, Unsafe.SizeOf<ImDrawVert>(), cmdList.VtxBuffer.Data + 8);
+                OpenTK.Graphics.ES11.GL.ColorPointer(4, OpenTK.Graphics.ES11.ColorPointerType.UnsignedByte, Unsafe.SizeOf<ImDrawVert>(), cmdList.VtxBuffer.Data + 16);
+
+                var idx_buffer = cmdList.IdxBuffer.Data;
+
+                for (int cmdIndex = 0; cmdIndex < cmdList.CmdBuffer.Size; cmdIndex++)
+                {
+                    ImDrawCmdPtr drawCommand = cmdList.CmdBuffer[cmdIndex];
+                    //System.Console.WriteLine(cmdList.CmdBuffer.Size);
+                    if (drawCommand.UserCallback != IntPtr.Zero)
+                    {
+                        throw new NotImplementedException();
+                    }
+                    else
+                    {
+                        var textureHandle = drawCommand.TextureId;
+                        GL.BindTexture(TextureTarget.Texture2D, (int)textureHandle);
+                        GL.Scissor((int)drawCommand.ClipRect.X, (int)(fb_height - drawCommand.ClipRect.W), (int)(drawCommand.ClipRect.Z - drawCommand.ClipRect.X), (int)(drawCommand.ClipRect.W - drawCommand.ClipRect.Y));
+                        GL.DrawElements(OpenTK.Graphics.ES20.PrimitiveType.Triangles, (int)drawCommand.ElemCount, DrawElementsType.UnsignedShort, idx_buffer + (int)drawCommand.IdxOffset);
+                    }
+                    idx_buffer += (Int32)drawCommand.ElemCount;
+                }
+            }
+
+            //GL.BindTexture(TextureTarget.Texture2D,lastTexutre);
+            //GL.BindBuffer(BufferTarget.ArrayBuffer,lastArrayBuffer);
+            //GL.BindBuffer(BufferTarget.ElementArrayBuffer,lastElementArrayBuffer);
+            GL.Disable(EnableCap.ScissorTest);
+        }
 
         private static unsafe IntPtr ConvertGlTextureHandleToImTextureId(uint glTextureHandle)
         {
             var imTexId = 0;
             long size = Unsafe.SizeOf<uint>();
-            Buffer.MemoryCopy(&glTextureHandle, &imTexId, size, size);
+            System.Buffer.MemoryCopy(&glTextureHandle, &imTexId, size, size);
             return new IntPtr(imTexId);
         }
 
@@ -263,7 +353,7 @@ namespace Chess.src
         {
             uint glTextureHandle = 0;
             long size = Unsafe.SizeOf<uint>();
-            Buffer.MemoryCopy(imTexId.ToPointer(), new IntPtr(&glTextureHandle).ToPointer(), size, size);
+            System.Buffer.MemoryCopy(imTexId.ToPointer(), new IntPtr(&glTextureHandle).ToPointer(), size, size);
             return glTextureHandle;
         }
 
@@ -312,6 +402,7 @@ namespace Chess.src
         private static void LoadMouseCursor(ImGuiMouseCursor imguiCursorType, Cursor.CursorType sfmlCursorType)
         {
             MouseCursors[(int)imguiCursorType] = new Cursor(sfmlCursorType);
+            System.Console.WriteLine(MouseCursors[(int)imguiCursorType].CPointer);
         }
 
         private static void UpdateMouseCursor(Window window)
@@ -329,7 +420,11 @@ namespace Chess.src
                 window.SetMouseCursorVisible(true);
 
                 var sfmlCursor = MouseCursors[(int)cursor] ?? MouseCursors[(int)ImGuiMouseCursor.Arrow];
-                window.SetMouseCursor(sfmlCursor);
+                if (sfmlCursor.CPointer != IntPtr.Zero)
+                {
+                    window.SetMouseCursor(sfmlCursor);
+                }
+
             }
         }
 
