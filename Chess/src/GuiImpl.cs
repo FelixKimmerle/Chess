@@ -103,6 +103,7 @@ namespace Chess.src
             window.GainedFocus += OnGainedFocus;
             window.LostFocus += OnLostFocus;
 
+            
             GameWindowSettings gameWindowSettings = new GameWindowSettings();
             NativeWindowSettings nativeWindow = new NativeWindowSettings();
             nativeWindow.StartVisible = false;

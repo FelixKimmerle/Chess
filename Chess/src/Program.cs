@@ -71,9 +71,9 @@ namespace Chess.src
 
 
                 window.SetActive(true);
-                window.PushGLStates();
+                //window.PushGLStates();
                 GuiImpl.Init(window);
-                window.PopGLStates();
+                //window.PopGLStates();
                 window.SetActive(false);
 
 
@@ -85,7 +85,7 @@ namespace Chess.src
                     // Process events
                     window.DispatchEvents();
                     window.SetActive(true);
-                    window.PushGLStates();
+                    //window.PushGLStates();
 
                     GuiImpl.Update(window, clock.Restart());
                     ImGui.BeginMainMenuBar();
@@ -102,7 +102,7 @@ namespace Chess.src
                         System.Console.WriteLine("Hi!");
                     }
 
-                    System.Console.WriteLine(texture.NativeHandle);
+                    //System.Console.WriteLine(texture.NativeHandle);
                     ImGui.Image(new IntPtr(texture.NativeHandle), new System.Numerics.Vector2(200, 200));
                     ImGui.End();
 
@@ -115,7 +115,7 @@ namespace Chess.src
                     ImGui.End();
                     ImGui.Button("lll");
 
-                    window.PopGLStates();
+                    //window.PopGLStates();
                     window.SetActive(false);
 
 
